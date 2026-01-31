@@ -1,6 +1,7 @@
 import CoreMotion
 import Foundation
 import HealthKit
+import WatchKit
 
 protocol HealthStoreAuthorizationProviding {
   func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus
@@ -18,6 +19,7 @@ final class SleepSessionManager: NSObject, ObservableObject {
   private let healthStore: HKHealthStore
   private let authorizationStore: HealthStoreAuthorizationProviding
   private let motionManager = MotionManager()
+  private let hapticType: WKHapticType = .notification
   private var workoutSession: HKWorkoutSession?
   private var workoutBuilder: HKLiveWorkoutBuilder?
   private var latestAcceleration: CMAcceleration?
@@ -114,6 +116,7 @@ final class SleepSessionManager: NSObject, ObservableObject {
 
     if let previous = latestAcceleration {
       if detectMotion(previous: previous, current: current) {
+        WKInterfaceDevice.current().play(hapticType)
         lastMotionDetectedAt = Date()
       }
     }
