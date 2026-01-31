@@ -1,21 +1,38 @@
 import Foundation
 import HealthKit
 
+protocol HealthStoreAuthorizationProviding {
+  func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus
+  func requestAuthorization(toShare typesToShare: Set<HKSampleType>?,
+                            read typesToRead: Set<HKObjectType>?,
+                            completion: @escaping (Bool, Error?) -> Void)
+}
+
+extension HKHealthStore: HealthStoreAuthorizationProviding {}
+
 final class SleepSessionManager: NSObject, ObservableObject {
   @Published private(set) var isMonitoring = false
   @Published private(set) var authorizationStatus: HKAuthorizationStatus = .notDetermined
 
-  private let healthStore = HKHealthStore()
+  private let healthStore: HKHealthStore
+  private let authorizationStore: HealthStoreAuthorizationProviding
   private var workoutSession: HKWorkoutSession?
   private var workoutBuilder: HKLiveWorkoutBuilder?
 
+  init(healthStore: HKHealthStore = HKHealthStore(),
+       authorizationStore: HealthStoreAuthorizationProviding? = nil) {
+    self.healthStore = healthStore
+    self.authorizationStore = authorizationStore ?? healthStore
+    super.init()
+  }
+
   func refreshAuthorizationStatus() {
-    authorizationStatus = healthStore.authorizationStatus(for: HKObjectType.workoutType())
+    authorizationStatus = authorizationStore.authorizationStatus(for: HKObjectType.workoutType())
   }
 
   func requestAuthorization(completion: @escaping (Bool) -> Void) {
     let workoutType = HKObjectType.workoutType()
-    healthStore.requestAuthorization(toShare: [workoutType], read: [workoutType]) { [weak self] success, _ in
+    authorizationStore.requestAuthorization(toShare: [workoutType], read: [workoutType]) { [weak self] success, _ in
       DispatchQueue.main.async {
         self?.refreshAuthorizationStatus()
         completion(success)

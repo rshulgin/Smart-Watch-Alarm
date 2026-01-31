@@ -9,17 +9,33 @@
 /* Begin PBXBuildFile section */
 		79590B74D53D47B79DBEB088 /* Smart_Watch_AlarmApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BA428FC16341D3AC78030D /* Smart_Watch_AlarmApp.swift */; };
 		164366D16C2B48FB8B1AD62C /* SleepSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E59577B335420A8BB52D03 /* SleepSessionManager.swift */; };
+		2C2D89CF480F475BB97C2814 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C4E009FE67B471789AF1614 /* XCTest.framework */; };
 		99E6C63BCD4245A1B2C1F457 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3219B068ED7B43D4A85EBFB8 /* ContentView.swift */; };
 		A393627F2B5E4310B1466ED3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0BD535B6988B4646A3E94A92 /* Assets.xcassets */; };
+		EEC868D710B5408FA76EA54C /* SleepSessionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4933B58882D49D5A7ADD16D /* SleepSessionManagerTests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		91B6922B0A19400788FCC02A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 507028CDBF2542F8A307CC53 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1E50FE01988C4EB2A21DFF40 /* Smart-Watch-Alarm */;
+			remoteInfo = "Smart-Watch-Alarm";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		06BA428FC16341D3AC78030D /* Smart_Watch_AlarmApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smart_Watch_AlarmApp.swift; sourceTree = "<group>"; };
 		0BD535B6988B4646A3E94A92 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		12C55BF685E24B0082680F08 /* Smart-Watch-Alarm.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Smart-Watch-Alarm.entitlements"; sourceTree = "<group>"; };
 		16E59577B335420A8BB52D03 /* SleepSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepSessionManager.swift; sourceTree = "<group>"; };
+		741B475BE09D4DE3A22B3A43 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8C4E009FE67B471789AF1614 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
 		3219B068ED7B43D4A85EBFB8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		861B8B584C8944519D683879 /* Smart-Watch-Alarm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Smart-Watch-Alarm.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		11D1E7AAA5004B51A52B090B /* Smart-Watch-AlarmTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Smart-Watch-AlarmTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4933B58882D49D5A7ADD16D /* SleepSessionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepSessionManagerTests.swift; sourceTree = "<group>"; };
 		DDDA726DD0754E04B2AB776B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -28,6 +44,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1E27B1C18D3A47258C40704C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2C2D89CF480F475BB97C2814 /* XCTest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -47,18 +71,38 @@
 			path = "Smart-Watch-Alarm";
 			sourceTree = "<group>";
 		};
+		AB1E62B0F8C744A7A270A928 /* Smart-Watch-AlarmTests */ = {
+			isa = PBXGroup;
+			children = (
+				D4933B58882D49D5A7ADD16D /* SleepSessionManagerTests.swift */,
+				741B475BE09D4DE3A22B3A43 /* Info.plist */,
+			);
+			path = "Smart-Watch-AlarmTests";
+			sourceTree = "<group>";
+		};
 		CADDFA32A1AC473DBC628656 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				861B8B584C8944519D683879 /* Smart-Watch-Alarm.app */,
+				11D1E7AAA5004B51A52B090B /* Smart-Watch-AlarmTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F8770BB38BF346EFBD0E52B6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8C4E009FE67B471789AF1614 /* XCTest.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		FA63CAE4BBDB42B5BBF099FF = {
 			isa = PBXGroup;
 			children = (
 				82B343597C7A4A18B6904952 /* Smart-Watch-Alarm */,
+				AB1E62B0F8C744A7A270A928 /* Smart-Watch-AlarmTests */,
+				F8770BB38BF346EFBD0E52B6 /* Frameworks */,
 				CADDFA32A1AC473DBC628656 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -83,6 +127,24 @@
 			productReference = 861B8B584C8944519D683879 /* Smart-Watch-Alarm.app */;
 			productType = "com.apple.product-type.application";
 		};
+		35AB13A43BBB456E9AF07C59 /* Smart-Watch-AlarmTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D1DF8481B3BE4D8D9B09F5AD /* Build configuration list for PBXNativeTarget "Smart-Watch-AlarmTests" */;
+			buildPhases = (
+				7887C8B68D8946C59EFB1155 /* Sources */,
+				1E27B1C18D3A47258C40704C /* Frameworks */,
+				13721932E736407D92B0E49A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2EF23351C13D4BEC9D17449B /* PBXTargetDependency */,
+			);
+			name = "Smart-Watch-AlarmTests";
+			productName = "Smart-Watch-AlarmTests";
+			productReference = 11D1E7AAA5004B51A52B090B /* Smart-Watch-AlarmTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -106,6 +168,7 @@
 			projectRoot = "";
 			targets = (
 				1E50FE01988C4EB2A21DFF40 /* Smart-Watch-Alarm */,
+				35AB13A43BBB456E9AF07C59 /* Smart-Watch-AlarmTests */,
 			);
 		};
 /* End PBXProject section */
@@ -116,6 +179,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				A393627F2B5E4310B1466ED3 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		13721932E736407D92B0E49A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,7 +202,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		7887C8B68D8946C59EFB1155 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EEC868D710B5408FA76EA54C /* SleepSessionManagerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2EF23351C13D4BEC9D17449B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1E50FE01988C4EB2A21DFF40 /* Smart-Watch-Alarm */;
+			targetProxy = 91B6922B0A19400788FCC02A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1FA2BD6188E64114A739103A /* Debug */ = {
@@ -156,6 +242,48 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		C0880F140F9F4CEFAB6313C1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "Smart-Watch-AlarmTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.rshulgin.smart-watch-alarm.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = watchos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Smart-Watch-Alarm.app/Smart-Watch-Alarm";
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		64D2BBC01724423DAF1DD991 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "Smart-Watch-AlarmTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.rshulgin.smart-watch-alarm.tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SUPPORTED_PLATFORMS = watchos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Smart-Watch-Alarm.app/Smart-Watch-Alarm";
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
 			};
 			name = Release;
 		};
@@ -211,6 +339,15 @@
 			buildConfigurations = (
 				1FA2BD6188E64114A739103A /* Debug */,
 				19199C2875D54895BCA8DB61 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D1DF8481B3BE4D8D9B09F5AD /* Build configuration list for PBXNativeTarget "Smart-Watch-AlarmTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C0880F140F9F4CEFAB6313C1 /* Debug */,
+				64D2BBC01724423DAF1DD991 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
