@@ -1,11 +1,13 @@
 import Foundation
 import HealthKit
 
-final class SleepSessionManager: ObservableObject {
+final class SleepSessionManager: NSObject, ObservableObject {
   @Published private(set) var isMonitoring = false
   @Published private(set) var authorizationStatus: HKAuthorizationStatus = .notDetermined
 
   private let healthStore = HKHealthStore()
+  private var workoutSession: HKWorkoutSession?
+  private var workoutBuilder: HKLiveWorkoutBuilder?
 
   func refreshAuthorizationStatus() {
     authorizationStatus = healthStore.authorizationStatus(for: HKObjectType.workoutType())
@@ -22,10 +24,77 @@ final class SleepSessionManager: ObservableObject {
   }
 
   func startMonitoring() {
-    isMonitoring = true
+    guard HKHealthStore.isHealthDataAvailable() else {
+      return
+    }
+
+    if workoutSession != nil {
+      return
+    }
+
+    let configuration = HKWorkoutConfiguration()
+    configuration.activityType = .mindAndBody
+    configuration.locationType = .unknown
+
+    do {
+      let session = try HKWorkoutSession(healthStore: healthStore, configuration: configuration)
+      let builder = session.associatedWorkoutBuilder()
+
+      session.delegate = self
+      builder.delegate = self
+      builder.dataSource = HKLiveWorkoutDataSource(healthStore: healthStore, workoutConfiguration: configuration)
+
+      workoutSession = session
+      workoutBuilder = builder
+
+      let startDate = Date()
+      session.startActivity(with: startDate)
+      builder.beginCollection(withStart: startDate) { [weak self] success, _ in
+        DispatchQueue.main.async {
+          self?.isMonitoring = success
+        }
+      }
+    } catch {
+      isMonitoring = false
+    }
   }
 
   func stopMonitoring() {
-    isMonitoring = false
+    guard let session = workoutSession else {
+      return
+    }
+
+    session.end()
+    workoutBuilder?.endCollection(withEnd: Date()) { [weak self] _, _ in
+      self?.workoutBuilder?.finishWorkout { _, _ in }
+    }
   }
+}
+
+extension SleepSessionManager: HKWorkoutSessionDelegate {
+  func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {
+    DispatchQueue.main.async { [weak self] in
+      self?.isMonitoring = false
+    }
+  }
+
+  func workoutSession(_ workoutSession: HKWorkoutSession,
+                      didChangeTo toState: HKWorkoutSessionState,
+                      from fromState: HKWorkoutSessionState,
+                      date: Date) {
+    DispatchQueue.main.async { [weak self] in
+      self?.isMonitoring = (toState == .running)
+
+      if toState == .ended {
+        self?.workoutSession = nil
+        self?.workoutBuilder = nil
+      }
+    }
+  }
+}
+
+extension SleepSessionManager: HKLiveWorkoutBuilderDelegate {
+  func workoutBuilderDidCollectEvent(_ workoutBuilder: HKLiveWorkoutBuilder) {}
+
+  func workoutBuilder(_ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf collectedTypes: Set<HKSampleType>) {}
 }
