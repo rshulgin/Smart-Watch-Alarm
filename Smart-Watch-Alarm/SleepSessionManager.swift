@@ -21,6 +21,8 @@ final class SleepSessionManager: NSObject, ObservableObject {
   private var workoutSession: HKWorkoutSession?
   private var workoutBuilder: HKLiveWorkoutBuilder?
   private var latestAcceleration: CMAcceleration?
+  private var lastMotionDetectedAt: Date?
+  private let motionThreshold = 0.15
 
   init(healthStore: HKHealthStore = HKHealthStore(),
        authorizationStore: HealthStoreAuthorizationProviding? = nil) {
@@ -97,7 +99,7 @@ final class SleepSessionManager: NSObject, ObservableObject {
   private func startMotionUpdates() {
     motionManager.startUpdates { [weak self] data in
       DispatchQueue.main.async {
-        self?.latestAcceleration = data.acceleration
+        self?.handleMotionData(data)
       }
     }
   }
@@ -105,6 +107,24 @@ final class SleepSessionManager: NSObject, ObservableObject {
   private func stopMotionUpdates() {
     motionManager.stopUpdates()
     latestAcceleration = nil
+    lastMotionDetectedAt = nil
+  }
+
+  private func handleMotionData(_ data: CMAccelerometerData) {
+    let current = data.acceleration
+
+    if let previous = latestAcceleration {
+      let deltaX = current.x - previous.x
+      let deltaY = current.y - previous.y
+      let deltaZ = current.z - previous.z
+      let deltaMagnitude = sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ)
+
+      if deltaMagnitude >= motionThreshold {
+        lastMotionDetectedAt = Date()
+      }
+    }
+
+    latestAcceleration = current
   }
 }
 
