@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		79590B74D53D47B79DBEB088 /* Smart_Watch_AlarmApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BA428FC16341D3AC78030D /* Smart_Watch_AlarmApp.swift */; };
+		164366D16C2B48FB8B1AD62C /* SleepSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E59577B335420A8BB52D03 /* SleepSessionManager.swift */; };
 		99E6C63BCD4245A1B2C1F457 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3219B068ED7B43D4A85EBFB8 /* ContentView.swift */; };
 		A393627F2B5E4310B1466ED3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0BD535B6988B4646A3E94A92 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -16,6 +17,7 @@
 		06BA428FC16341D3AC78030D /* Smart_Watch_AlarmApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smart_Watch_AlarmApp.swift; sourceTree = "<group>"; };
 		0BD535B6988B4646A3E94A92 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		12C55BF685E24B0082680F08 /* Smart-Watch-Alarm.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Smart-Watch-Alarm.entitlements"; sourceTree = "<group>"; };
+		16E59577B335420A8BB52D03 /* SleepSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepSessionManager.swift; sourceTree = "<group>"; };
 		3219B068ED7B43D4A85EBFB8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		861B8B584C8944519D683879 /* Smart-Watch-Alarm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Smart-Watch-Alarm.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDDA726DD0754E04B2AB776B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -36,6 +38,7 @@
 			isa = PBXGroup;
 			children = (
 				06BA428FC16341D3AC78030D /* Smart_Watch_AlarmApp.swift */,
+				16E59577B335420A8BB52D03 /* SleepSessionManager.swift */,
 				3219B068ED7B43D4A85EBFB8 /* ContentView.swift */,
 				0BD535B6988B4646A3E94A92 /* Assets.xcassets */,
 				DDDA726DD0754E04B2AB776B /* Info.plist */,
@@ -124,6 +127,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				79590B74D53D47B79DBEB088 /* Smart_Watch_AlarmApp.swift in Sources */,
+				164366D16C2B48FB8B1AD62C /* SleepSessionManager.swift in Sources */,
 				99E6C63BCD4245A1B2C1F457 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
