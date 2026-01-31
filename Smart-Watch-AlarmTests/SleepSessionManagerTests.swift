@@ -25,6 +25,22 @@ final class SleepSessionManagerTests: XCTestCase {
 
     wait(for: [expectation], timeout: 1.0)
   }
+
+  func testStopSessionMarksEnded() {
+    let manager = SleepSessionManager()
+
+    manager.stopSession()
+
+    XCTAssertTrue(manager.isSessionEnded)
+  }
+
+  func testStopSessionStopsMonitoring() {
+    let manager = SleepSessionManager()
+
+    manager.stopSession()
+
+    XCTAssertFalse(manager.isMonitoring)
+  }
 }
 
 private final class StubAuthorizationStore: HealthStoreAuthorizationProviding {
