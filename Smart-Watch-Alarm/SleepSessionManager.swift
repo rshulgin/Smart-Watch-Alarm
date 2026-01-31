@@ -24,6 +24,7 @@ final class SleepSessionManager: NSObject, ObservableObject {
   private var workoutBuilder: HKLiveWorkoutBuilder?
   private var latestAcceleration: CMAcceleration?
   private var lastMotionDetectedAt: Date?
+  private var lastHapticTriggeredAt: Date?
 
   init(healthStore: HKHealthStore = HKHealthStore(),
        authorizationStore: HealthStoreAuthorizationProviding? = nil) {
@@ -109,6 +110,7 @@ final class SleepSessionManager: NSObject, ObservableObject {
     motionManager.stopUpdates()
     latestAcceleration = nil
     lastMotionDetectedAt = nil
+    lastHapticTriggeredAt = nil
   }
 
   private func handleMotionData(_ data: CMAccelerometerData) {
@@ -116,8 +118,12 @@ final class SleepSessionManager: NSObject, ObservableObject {
 
     if let previous = latestAcceleration {
       if detectMotion(previous: previous, current: current) {
-        WKInterfaceDevice.current().play(hapticType)
-        lastMotionDetectedAt = Date()
+        let now = Date()
+        if canTriggerHaptic(at: now) {
+          WKInterfaceDevice.current().play(hapticType)
+          lastHapticTriggeredAt = now
+        }
+        lastMotionDetectedAt = now
       }
     }
 
@@ -131,6 +137,14 @@ final class SleepSessionManager: NSObject, ObservableObject {
     let deltaMagnitude = sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ)
 
     return deltaMagnitude >= MotionConstants.motionThreshold
+  }
+
+  private func canTriggerHaptic(at date: Date) -> Bool {
+    guard let lastHapticTriggeredAt else {
+      return true
+    }
+
+    return date.timeIntervalSince(lastHapticTriggeredAt) >= MotionConstants.motionCooldownSeconds
   }
 }
 
