@@ -1,3 +1,4 @@
+import CoreMotion
 import Foundation
 import HealthKit
 
@@ -16,8 +17,10 @@ final class SleepSessionManager: NSObject, ObservableObject {
 
   private let healthStore: HKHealthStore
   private let authorizationStore: HealthStoreAuthorizationProviding
+  private let motionManager = MotionManager()
   private var workoutSession: HKWorkoutSession?
   private var workoutBuilder: HKLiveWorkoutBuilder?
+  private var latestAcceleration: CMAcceleration?
 
   init(healthStore: HKHealthStore = HKHealthStore(),
        authorizationStore: HealthStoreAuthorizationProviding? = nil) {
@@ -69,6 +72,9 @@ final class SleepSessionManager: NSObject, ObservableObject {
       builder.beginCollection(withStart: startDate) { [weak self] success, _ in
         DispatchQueue.main.async {
           self?.isMonitoring = success
+          if success {
+            self?.startMotionUpdates()
+          }
         }
       }
     } catch {
@@ -81,16 +87,31 @@ final class SleepSessionManager: NSObject, ObservableObject {
       return
     }
 
+    stopMotionUpdates()
     session.end()
     workoutBuilder?.endCollection(withEnd: Date()) { [weak self] _, _ in
       self?.workoutBuilder?.finishWorkout { _, _ in }
     }
+  }
+
+  private func startMotionUpdates() {
+    motionManager.startUpdates { [weak self] data in
+      DispatchQueue.main.async {
+        self?.latestAcceleration = data.acceleration
+      }
+    }
+  }
+
+  private func stopMotionUpdates() {
+    motionManager.stopUpdates()
+    latestAcceleration = nil
   }
 }
 
 extension SleepSessionManager: HKWorkoutSessionDelegate {
   func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {
     DispatchQueue.main.async { [weak self] in
+      self?.stopMotionUpdates()
       self?.isMonitoring = false
     }
   }
@@ -103,6 +124,7 @@ extension SleepSessionManager: HKWorkoutSessionDelegate {
       self?.isMonitoring = (toState == .running)
 
       if toState == .ended {
+        self?.stopMotionUpdates()
         self?.workoutSession = nil
         self?.workoutBuilder = nil
       }
