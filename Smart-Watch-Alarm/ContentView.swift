@@ -40,8 +40,8 @@ struct ContentView: View {
     .onAppear {
       startMonitoringIfPossible()
     }
-    .onChange(of: sessionManager.isMonitoring) { isMonitoring in
-      pulse = isMonitoring
+    .onChange(of: sessionManager.isMonitoring) { newValue, _ in
+      pulse = newValue
     }
   }
 
