@@ -22,7 +22,6 @@ final class SleepSessionManager: NSObject, ObservableObject {
   private var workoutBuilder: HKLiveWorkoutBuilder?
   private var latestAcceleration: CMAcceleration?
   private var lastMotionDetectedAt: Date?
-  private let motionThreshold = 0.15
 
   init(healthStore: HKHealthStore = HKHealthStore(),
        authorizationStore: HealthStoreAuthorizationProviding? = nil) {
@@ -119,7 +118,7 @@ final class SleepSessionManager: NSObject, ObservableObject {
       let deltaZ = current.z - previous.z
       let deltaMagnitude = sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ)
 
-      if deltaMagnitude >= motionThreshold {
+      if deltaMagnitude >= MotionConstants.motionThreshold {
         lastMotionDetectedAt = Date()
       }
     }

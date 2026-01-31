@@ -4,7 +4,7 @@ final class MotionManager {
   private let motionManager: CMMotionManager
   private let queue: OperationQueue
 
-  init(updateInterval: TimeInterval = 1.0) {
+  init(updateInterval: TimeInterval = MotionConstants.updateInterval) {
     motionManager = CMMotionManager()
     motionManager.accelerometerUpdateInterval = updateInterval
 
