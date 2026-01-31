@@ -113,17 +113,21 @@ final class SleepSessionManager: NSObject, ObservableObject {
     let current = data.acceleration
 
     if let previous = latestAcceleration {
-      let deltaX = current.x - previous.x
-      let deltaY = current.y - previous.y
-      let deltaZ = current.z - previous.z
-      let deltaMagnitude = sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ)
-
-      if deltaMagnitude >= MotionConstants.motionThreshold {
+      if detectMotion(previous: previous, current: current) {
         lastMotionDetectedAt = Date()
       }
     }
 
     latestAcceleration = current
+  }
+
+  func detectMotion(previous: CMAcceleration, current: CMAcceleration) -> Bool {
+    let deltaX = current.x - previous.x
+    let deltaY = current.y - previous.y
+    let deltaZ = current.z - previous.z
+    let deltaMagnitude = sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ)
+
+    return deltaMagnitude >= MotionConstants.motionThreshold
   }
 }
 
