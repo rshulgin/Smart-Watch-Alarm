@@ -15,6 +15,7 @@ extension HKHealthStore: HealthStoreAuthorizationProviding {}
 final class SleepSessionManager: NSObject, ObservableObject {
   @Published private(set) var isMonitoring = false
   @Published private(set) var authorizationStatus: HKAuthorizationStatus = .notDetermined
+  @Published private(set) var isSessionEnded = false
 
   private let healthStore: HKHealthStore
   private let authorizationStore: HealthStoreAuthorizationProviding
@@ -87,15 +88,20 @@ final class SleepSessionManager: NSObject, ObservableObject {
   }
 
   func stopMonitoring() {
+    stopMotionUpdates()
     guard let session = workoutSession else {
       return
     }
-
-    stopMotionUpdates()
     session.end()
     workoutBuilder?.endCollection(withEnd: Date()) { [weak self] _, _ in
       self?.workoutBuilder?.finishWorkout { _, _ in }
     }
+  }
+
+  func stopSession() {
+    stopMonitoring()
+    isMonitoring = false
+    isSessionEnded = true
   }
 
   private func startMotionUpdates() {
