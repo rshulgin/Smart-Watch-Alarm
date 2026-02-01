@@ -12,6 +12,9 @@
 		4ECEA047B6CC4985AF524C76 /* MotionConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37D6BCD1B354F4FA28A556F /* MotionConstants.swift */; };
 		6D4C11F912844D17AD6998C6 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9F7E06A9B470CA6BC7661 /* MotionManager.swift */; };
 		687CE6390B4342A283135CF0 /* MotionDetectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C173E4DFAE44943833EC1E0 /* MotionDetectionTests.swift */; };
+		D4E5F6A7B8C9D0E1F2A3B4C5 /* MotionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* MotionManagerTests.swift */; };
+		E5F6A7B8C9D0E1F2A3B4C5D6 /* ContentViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A7B8C9D0E1F2A3 /* ContentViewTests.swift */; };
+		F6A7B8C9D0E1F2A3B4C5D6E7 /* SmartWatchAlarmAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5F6A7B8C9D0E1F2A3B4 /* SmartWatchAlarmAppTests.swift */; };
 		79590B74D53D47B79DBEB088 /* Smart_Watch_AlarmApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BA428FC16341D3AC78030D /* Smart_Watch_AlarmApp.swift */; };
 		99E6C63BCD4245A1B2C1F457 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3219B068ED7B43D4A85EBFB8 /* ContentView.swift */; };
 		A393627F2B5E4310B1466ED3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0BD535B6988B4646A3E94A92 /* Assets.xcassets */; };
@@ -32,6 +35,9 @@
 		06BA428FC16341D3AC78030D /* Smart_Watch_AlarmApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smart_Watch_AlarmApp.swift; sourceTree = "<group>"; };
 		0BD535B6988B4646A3E94A92 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0C173E4DFAE44943833EC1E0 /* MotionDetectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDetectionTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* MotionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManagerTests.swift; sourceTree = "<group>"; };
+		B2C3D4E5F6A7B8C9D0E1F2A3 /* ContentViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewTests.swift; sourceTree = "<group>"; };
+		C3D4E5F6A7B8C9D0E1F2A3B4 /* SmartWatchAlarmAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartWatchAlarmAppTests.swift; sourceTree = "<group>"; };
 		11D1E7AAA5004B51A52B090B /* Smart-Watch-AlarmTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Smart-Watch-AlarmTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		12C55BF685E24B0082680F08 /* Smart-Watch-Alarm.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Smart-Watch-Alarm.entitlements"; sourceTree = "<group>"; };
 		1FF9F7E06A9B470CA6BC7661 /* MotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManager.swift; sourceTree = "<group>"; };
@@ -82,8 +88,11 @@
 		AB1E62B0F8C744A7A270A928 /* Smart-Watch-AlarmTests */ = {
 			isa = PBXGroup;
 			children = (
+				B2C3D4E5F6A7B8C9D0E1F2A3 /* ContentViewTests.swift */,
 				0C173E4DFAE44943833EC1E0 /* MotionDetectionTests.swift */,
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* MotionManagerTests.swift */,
 				D4933B58882D49D5A7ADD16D /* SleepSessionManagerTests.swift */,
+				C3D4E5F6A7B8C9D0E1F2A3B4 /* SmartWatchAlarmAppTests.swift */,
 				741B475BE09D4DE3A22B3A43 /* Info.plist */,
 			);
 			path = "Smart-Watch-AlarmTests";
@@ -206,8 +215,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E5F6A7B8C9D0E1F2A3B4C5D6 /* ContentViewTests.swift in Sources */,
 				687CE6390B4342A283135CF0 /* MotionDetectionTests.swift in Sources */,
+				D4E5F6A7B8C9D0E1F2A3B4C5 /* MotionManagerTests.swift in Sources */,
 				EEC868D710B5408FA76EA54C /* SleepSessionManagerTests.swift in Sources */,
+				F6A7B8C9D0E1F2A3B4C5D6E7 /* SmartWatchAlarmAppTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

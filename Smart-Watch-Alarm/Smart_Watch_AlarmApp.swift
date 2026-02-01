@@ -6,8 +6,7 @@ struct Smart_Watch_AlarmApp: App {
 
   var body: some Scene {
     WindowGroup {
-      ContentView()
-        .environmentObject(sessionManager)
+      ContentView(sessionManager: sessionManager)
     }
   }
 }

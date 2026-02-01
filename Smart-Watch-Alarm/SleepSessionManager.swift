@@ -12,25 +12,84 @@ protocol HealthStoreAuthorizationProviding {
 
 extension HKHealthStore: HealthStoreAuthorizationProviding {}
 
-final class SleepSessionManager: NSObject, ObservableObject {
+protocol HapticPlaying {
+  func play(_ type: WKHapticType)
+}
+
+struct DefaultHapticPlayer: HapticPlaying {
+  func play(_ type: WKHapticType) {
+    WKInterfaceDevice.current().play(type)
+  }
+}
+
+protocol WorkoutSessionBuilding: AnyObject {
+  var delegate: HKLiveWorkoutBuilderDelegate? { get set }
+  var dataSource: HKLiveWorkoutDataSource? { get set }
+  func beginCollection(withStart startDate: Date, completion: @escaping (Bool, Error?) -> Void)
+  func endCollection(withEnd endDate: Date, completion: @escaping (Bool, Error?) -> Void)
+  func finishWorkout(completion: @escaping (HKWorkout?, Error?) -> Void)
+}
+
+extension HKLiveWorkoutBuilder: WorkoutSessionBuilding {}
+
+protocol WorkoutSessioning: AnyObject {
+  var delegate: HKWorkoutSessionDelegate? { get set }
+  func startActivity(with date: Date?)
+  func end()
+  func makeWorkoutBuilder() -> WorkoutSessionBuilding
+}
+
+extension HKWorkoutSession: WorkoutSessioning {
+  func makeWorkoutBuilder() -> WorkoutSessionBuilding {
+    associatedWorkoutBuilder()
+  }
+}
+
+protocol WorkoutSessionFactory {
+  func makeSession(healthStore: HKHealthStore,
+                   configuration: HKWorkoutConfiguration) throws -> WorkoutSessioning
+}
+
+struct HealthKitWorkoutSessionFactory: WorkoutSessionFactory {
+  func makeSession(healthStore: HKHealthStore,
+                   configuration: HKWorkoutConfiguration) throws -> WorkoutSessioning {
+    try HKWorkoutSession(healthStore: healthStore, configuration: configuration)
+  }
+}
+
+class SleepSessionManager: NSObject, ObservableObject {
   @Published private(set) var isMonitoring = false
   @Published private(set) var authorizationStatus: HKAuthorizationStatus = .notDetermined
   @Published private(set) var isSessionEnded = false
 
   private let healthStore: HKHealthStore
   private let authorizationStore: HealthStoreAuthorizationProviding
-  private let motionManager = MotionManager()
+  private let motionManager: MotionManager
+  private let hapticPlayer: HapticPlaying
+  private let workoutSessionFactory: WorkoutSessionFactory
+  private let healthAvailabilityProvider: () -> Bool
+  private let dateProvider: () -> Date
   private let hapticType: WKHapticType = .notification
-  private var workoutSession: HKWorkoutSession?
-  private var workoutBuilder: HKLiveWorkoutBuilder?
+  private var workoutSession: WorkoutSessioning?
+  private var workoutBuilder: WorkoutSessionBuilding?
   private var latestAcceleration: CMAcceleration?
   private var lastMotionDetectedAt: Date?
   private var lastHapticTriggeredAt: Date?
 
   init(healthStore: HKHealthStore = HKHealthStore(),
-       authorizationStore: HealthStoreAuthorizationProviding? = nil) {
+       authorizationStore: HealthStoreAuthorizationProviding? = nil,
+       motionManager: MotionManager = MotionManager(),
+       hapticPlayer: HapticPlaying = DefaultHapticPlayer(),
+       workoutSessionFactory: WorkoutSessionFactory = HealthKitWorkoutSessionFactory(),
+       healthAvailabilityProvider: @escaping () -> Bool = HKHealthStore.isHealthDataAvailable,
+       dateProvider: @escaping () -> Date = Date.init) {
     self.healthStore = healthStore
     self.authorizationStore = authorizationStore ?? healthStore
+    self.motionManager = motionManager
+    self.hapticPlayer = hapticPlayer
+    self.workoutSessionFactory = workoutSessionFactory
+    self.healthAvailabilityProvider = healthAvailabilityProvider
+    self.dateProvider = dateProvider
     super.init()
   }
 
@@ -49,7 +108,7 @@ final class SleepSessionManager: NSObject, ObservableObject {
   }
 
   func startMonitoring() {
-    guard HKHealthStore.isHealthDataAvailable() else {
+    guard healthAvailabilityProvider() else {
       return
     }
 
@@ -62,8 +121,8 @@ final class SleepSessionManager: NSObject, ObservableObject {
     configuration.locationType = .unknown
 
     do {
-      let session = try HKWorkoutSession(healthStore: healthStore, configuration: configuration)
-      let builder = session.associatedWorkoutBuilder()
+      let session = try workoutSessionFactory.makeSession(healthStore: healthStore, configuration: configuration)
+      let builder = session.makeWorkoutBuilder()
 
       session.delegate = self
       builder.delegate = self
@@ -104,12 +163,20 @@ final class SleepSessionManager: NSObject, ObservableObject {
     isSessionEnded = true
   }
 
+  func setMonitoringForTesting(_ value: Bool) {
+    isMonitoring = value
+  }
+
   private func startMotionUpdates() {
-    motionManager.startUpdates { [weak self] data in
+    motionManager.startUpdates { [weak self] acceleration in
       DispatchQueue.main.async {
-        self?.handleMotionData(data)
+        self?.handleAcceleration(acceleration, at: SleepSessionManager.resolveDate(using: self))
       }
     }
+  }
+
+  static func resolveDate(using manager: SleepSessionManager?) -> Date {
+    manager?.dateProvider() ?? Date()
   }
 
   private func stopMotionUpdates() {
@@ -119,21 +186,18 @@ final class SleepSessionManager: NSObject, ObservableObject {
     lastHapticTriggeredAt = nil
   }
 
-  private func handleMotionData(_ data: CMAccelerometerData) {
-    let current = data.acceleration
-
+  func handleAcceleration(_ acceleration: CMAcceleration, at date: Date) {
     if let previous = latestAcceleration {
-      if detectMotion(previous: previous, current: current) {
-        let now = Date()
-        if canTriggerHaptic(at: now) {
-          WKInterfaceDevice.current().play(hapticType)
-          lastHapticTriggeredAt = now
+      if detectMotion(previous: previous, current: acceleration) {
+        if canTriggerHaptic(at: date) {
+          hapticPlayer.play(hapticType)
+          lastHapticTriggeredAt = date
         }
-        lastMotionDetectedAt = now
+        lastMotionDetectedAt = date
       }
     }
 
-    latestAcceleration = current
+    latestAcceleration = acceleration
   }
 
   func detectMotion(previous: CMAcceleration, current: CMAcceleration) -> Bool {
@@ -145,7 +209,7 @@ final class SleepSessionManager: NSObject, ObservableObject {
     return deltaMagnitude >= MotionConstants.motionThreshold
   }
 
-  private func canTriggerHaptic(at date: Date) -> Bool {
+  func canTriggerHaptic(at date: Date) -> Bool {
     guard let lastHapticTriggeredAt else {
       return true
     }
