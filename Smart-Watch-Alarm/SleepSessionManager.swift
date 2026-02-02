@@ -92,6 +92,7 @@ class SleepSessionManager: NSObject, ObservableObject {
   private let healthAvailabilityProvider: () -> Bool
   private let dateProvider: () -> Date
   private let hapticType: WKHapticType = .failure
+  private let hapticPattern: [WKHapticType]
   private var workoutSession: WorkoutSessioning?
   private var workoutBuilder: WorkoutSessionBuilding?
   private var latestAcceleration: CMAcceleration?
@@ -105,6 +106,7 @@ class SleepSessionManager: NSObject, ObservableObject {
        motionManager: MotionManager = MotionManager(),
        hapticPlayer: HapticPlaying = DefaultHapticPlayer(),
        hapticScheduler: HapticScheduling = MainHapticScheduler(),
+       hapticPattern: [WKHapticType] = [.failure, .notification, .success, .failure, .notification],
        workoutSessionFactory: WorkoutSessionFactory = HealthKitWorkoutSessionFactory(),
        healthAvailabilityProvider: @escaping () -> Bool = HKHealthStore.isHealthDataAvailable,
        dateProvider: @escaping () -> Date = Date.init) {
@@ -113,6 +115,7 @@ class SleepSessionManager: NSObject, ObservableObject {
     self.motionManager = motionManager
     self.hapticPlayer = hapticPlayer
     self.hapticScheduler = hapticScheduler
+    self.hapticPattern = hapticPattern
     self.workoutSessionFactory = workoutSessionFactory
     self.healthAvailabilityProvider = healthAvailabilityProvider
     self.dateProvider = dateProvider
@@ -314,14 +317,16 @@ class SleepSessionManager: NSObject, ObservableObject {
     isHapticBurstActive = true
     lastHapticTriggeredAt = date
 
-    let burstCount = max(MotionConstants.hapticBurstCount, 1)
+    let pattern = hapticPattern.isEmpty ? [hapticType] : hapticPattern
+    let burstCount = max(MotionConstants.hapticBurstCount, pattern.count)
     for index in 0..<burstCount {
       let delay = TimeInterval(index) * MotionConstants.hapticBurstInterval
       hapticScheduler.schedule(after: delay) { [weak self] in
         guard let self else {
           return
         }
-        self.hapticPlayer.play(self.hapticType)
+        let type = pattern[index % pattern.count]
+        self.hapticPlayer.play(type)
         if index == burstCount - 1 {
           self.isHapticBurstActive = false
         }
