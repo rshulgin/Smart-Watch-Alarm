@@ -2,14 +2,8 @@ import SwiftUI
 
 struct ContentView: View {
   @ObservedObject var sessionManager: SleepSessionManager
-  @State private var didStart = false
   @State private var pulse = false
-
-  init(sessionManager: SleepSessionManager, didStart: Bool = false, pulse: Bool = false) {
-    self.sessionManager = sessionManager
-    _didStart = State(initialValue: didStart)
-    _pulse = State(initialValue: pulse)
-  }
+  @Environment(\.scenePhase) private var scenePhase
 
   var body: some View {
     GeometryReader { proxy in
@@ -17,7 +11,12 @@ struct ContentView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     }
     .onAppear(perform: handleAppear)
-    .onChange(of: sessionManager.isMonitoring, perform: handleMonitoringChange)
+    .onChange(of: sessionManager.isMonitoring) { oldValue, newValue in
+      handleMonitoringChange(newValue)
+    }
+    .onChange(of: scenePhase) { oldValue, newValue in
+      handleScenePhaseChange(newValue)
+    }
   }
 
   @ViewBuilder
@@ -47,40 +46,84 @@ struct ContentView: View {
             .opacity(sessionManager.isMonitoring ? 1 : 0)
         )
 
-        Text(sessionManager.isMonitoring ? "Monitoring..." : "Starting...")
+        Text(statusText)
           .font(.footnote)
-          .foregroundColor(.secondary)
+          .foregroundColor(statusColor)
+
+        if statusHintText != nil {
+          Text(statusHintText ?? "")
+            .font(.footnote)
+            .foregroundColor(.secondary)
+            .multilineTextAlignment(.center)
+        }
+
+        if shouldShowRetry {
+          Button("Retry") {
+            sessionManager.retryAuthorization()
+          }
+          .font(.footnote)
+          .buttonStyle(.bordered)
+        }
       }
     }
   }
 
-  func startMonitoringIfPossible() {
-    guard !didStart else {
-      return
+  var statusText: String {
+    switch sessionManager.status {
+    case .monitoring:
+      return "Monitoring..."
+    case .needsAuthorization:
+      return "Health access required"
+    case .healthUnavailable:
+      return "Health unavailable"
+    case .motionUnavailable:
+      return "Motion unavailable"
+    case .failed:
+      return "Failed to start"
+    case .ended:
+      return "Session ended"
+    case .starting:
+      return "Starting..."
     }
+  }
 
-    didStart = true
-    if sessionManager.isSessionEnded {
-      return
-    }
-    sessionManager.refreshAuthorizationStatus()
-
-    switch sessionManager.authorizationStatus {
-    case .sharingAuthorized:
-      sessionManager.startMonitoring()
-    case .notDetermined:
-      sessionManager.requestAuthorization { success in
-        if success {
-          sessionManager.startMonitoring()
-        }
-      }
+  var statusColor: Color {
+    switch sessionManager.status {
+    case .needsAuthorization:
+      return .orange
+    case .healthUnavailable, .motionUnavailable, .failed:
+      return .red
     default:
-      break
+      return .secondary
+    }
+  }
+
+  var shouldShowRetry: Bool {
+    switch sessionManager.status {
+    case .needsAuthorization, .failed:
+      return true
+    default:
+      return false
+    }
+  }
+
+  var statusHintText: String? {
+    switch sessionManager.status {
+    case .needsAuthorization:
+      return "If no prompt appears, open iPhone Health and allow access for this app."
+    default:
+      return nil
     }
   }
 
   func handleAppear() {
-    startMonitoringIfPossible()
+    sessionManager.attemptStart()
+  }
+
+  func handleScenePhaseChange(_ newPhase: ScenePhase) {
+    if newPhase == .active {
+      sessionManager.attemptStart()
+    }
   }
 
   func handleMonitoringChange(_ newValue: Bool) {

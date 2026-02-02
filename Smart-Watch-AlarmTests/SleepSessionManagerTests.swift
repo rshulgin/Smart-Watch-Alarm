@@ -148,7 +148,8 @@ final class SleepSessionManagerTests: XCTestCase {
 
   func testHandleAccelerationTriggersHapticWithCooldown() {
     let hapticPlayer = FakeHapticPlayer()
-    let manager = SleepSessionManager(hapticPlayer: hapticPlayer)
+    let scheduler = ImmediateHapticScheduler()
+    let manager = SleepSessionManager(hapticPlayer: hapticPlayer, hapticScheduler: scheduler)
     let baseline = CMAcceleration(x: 0, y: 0, z: 0)
     let trigger = CMAcceleration(x: MotionConstants.motionThreshold * 2, y: 0, z: 0)
     let startDate = Date()
@@ -158,12 +159,13 @@ final class SleepSessionManagerTests: XCTestCase {
     manager.handleAcceleration(baseline, at: startDate.addingTimeInterval(5))
     manager.handleAcceleration(trigger, at: startDate.addingTimeInterval(MotionConstants.motionCooldownSeconds))
 
-    XCTAssertEqual(hapticPlayer.played.count, 2)
+    XCTAssertEqual(hapticPlayer.played.count, MotionConstants.hapticBurstCount * 2)
   }
 
   func testHandleAccelerationDoesNotTriggerBelowThreshold() {
     let hapticPlayer = FakeHapticPlayer()
-    let manager = SleepSessionManager(hapticPlayer: hapticPlayer)
+    let scheduler = ImmediateHapticScheduler()
+    let manager = SleepSessionManager(hapticPlayer: hapticPlayer, hapticScheduler: scheduler)
     let baseline = CMAcceleration(x: 0, y: 0, z: 0)
     let smallMove = CMAcceleration(x: MotionConstants.motionThreshold * 0.5, y: 0, z: 0)
     let date = Date()
@@ -328,6 +330,12 @@ private final class FakeHapticPlayer: HapticPlaying {
 
   func play(_ type: WKHapticType) {
     played.append(type)
+  }
+}
+
+private struct ImmediateHapticScheduler: HapticScheduling {
+  func schedule(after delay: TimeInterval, _ block: @escaping () -> Void) {
+    block()
   }
 }
 

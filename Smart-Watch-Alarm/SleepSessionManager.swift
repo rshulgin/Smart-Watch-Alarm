@@ -7,7 +7,7 @@ protocol HealthStoreAuthorizationProviding {
   func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus
   func requestAuthorization(toShare typesToShare: Set<HKSampleType>?,
                             read typesToRead: Set<HKObjectType>?,
-                            completion: @escaping (Bool, Error?) -> Void)
+                            completion: @escaping @Sendable (Bool, Error?) -> Void)
 }
 
 extension HKHealthStore: HealthStoreAuthorizationProviding {}
@@ -22,12 +22,32 @@ struct DefaultHapticPlayer: HapticPlaying {
   }
 }
 
+protocol HapticScheduling {
+  func schedule(after delay: TimeInterval, _ block: @escaping () -> Void)
+}
+
+struct MainHapticScheduler: HapticScheduling {
+  func schedule(after delay: TimeInterval, _ block: @escaping () -> Void) {
+    DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: block)
+  }
+}
+
+enum MonitoringStatus: Equatable {
+  case starting
+  case monitoring
+  case needsAuthorization
+  case healthUnavailable
+  case motionUnavailable
+  case failed
+  case ended
+}
+
 protocol WorkoutSessionBuilding: AnyObject {
+  func beginCollection(withStart startDate: Date, completion: @escaping @Sendable (Bool, Error?) -> Void)
+  func endCollection(withEnd endDate: Date, completion: @escaping @Sendable (Bool, Error?) -> Void)
+  func finishWorkout(completion: @escaping @Sendable (HKWorkout?, Error?) -> Void)
   var delegate: HKLiveWorkoutBuilderDelegate? { get set }
   var dataSource: HKLiveWorkoutDataSource? { get set }
-  func beginCollection(withStart startDate: Date, completion: @escaping (Bool, Error?) -> Void)
-  func endCollection(withEnd endDate: Date, completion: @escaping (Bool, Error?) -> Void)
-  func finishWorkout(completion: @escaping (HKWorkout?, Error?) -> Void)
 }
 
 extension HKLiveWorkoutBuilder: WorkoutSessionBuilding {}
@@ -61,25 +81,30 @@ class SleepSessionManager: NSObject, ObservableObject {
   @Published private(set) var isMonitoring = false
   @Published private(set) var authorizationStatus: HKAuthorizationStatus = .notDetermined
   @Published private(set) var isSessionEnded = false
+  @Published private(set) var status: MonitoringStatus = .starting
 
   private let healthStore: HKHealthStore
   private let authorizationStore: HealthStoreAuthorizationProviding
   private let motionManager: MotionManager
   private let hapticPlayer: HapticPlaying
+  private let hapticScheduler: HapticScheduling
   private let workoutSessionFactory: WorkoutSessionFactory
   private let healthAvailabilityProvider: () -> Bool
   private let dateProvider: () -> Date
-  private let hapticType: WKHapticType = .notification
+  private let hapticType: WKHapticType = .failure
   private var workoutSession: WorkoutSessioning?
   private var workoutBuilder: WorkoutSessionBuilding?
   private var latestAcceleration: CMAcceleration?
   private var lastMotionDetectedAt: Date?
   private var lastHapticTriggeredAt: Date?
+  private var isStarting = false
+  private var isHapticBurstActive = false
 
   init(healthStore: HKHealthStore = HKHealthStore(),
        authorizationStore: HealthStoreAuthorizationProviding? = nil,
        motionManager: MotionManager = MotionManager(),
        hapticPlayer: HapticPlaying = DefaultHapticPlayer(),
+       hapticScheduler: HapticScheduling = MainHapticScheduler(),
        workoutSessionFactory: WorkoutSessionFactory = HealthKitWorkoutSessionFactory(),
        healthAvailabilityProvider: @escaping () -> Bool = HKHealthStore.isHealthDataAvailable,
        dateProvider: @escaping () -> Date = Date.init) {
@@ -87,6 +112,7 @@ class SleepSessionManager: NSObject, ObservableObject {
     self.authorizationStore = authorizationStore ?? healthStore
     self.motionManager = motionManager
     self.hapticPlayer = hapticPlayer
+    self.hapticScheduler = hapticScheduler
     self.workoutSessionFactory = workoutSessionFactory
     self.healthAvailabilityProvider = healthAvailabilityProvider
     self.dateProvider = dateProvider
@@ -95,6 +121,47 @@ class SleepSessionManager: NSObject, ObservableObject {
 
   func refreshAuthorizationStatus() {
     authorizationStatus = authorizationStore.authorizationStatus(for: HKObjectType.workoutType())
+  }
+
+  func attemptStart() {
+    guard !isSessionEnded else {
+      return
+    }
+
+    if isMonitoring {
+      status = .monitoring
+      return
+    }
+
+    guard !isStarting else {
+      return
+    }
+
+    refreshAuthorizationStatus()
+
+    switch authorizationStatus {
+    case .sharingAuthorized:
+      isStarting = true
+      startMonitoring()
+    case .notDetermined:
+      isStarting = true
+      status = .starting
+      requestAuthorization { [weak self] success in
+        guard let self else {
+          return
+        }
+        if success {
+          self.startMonitoring()
+        } else {
+          self.isStarting = false
+          self.status = .needsAuthorization
+        }
+      }
+    case .sharingDenied:
+      status = .needsAuthorization
+    @unknown default:
+      status = .needsAuthorization
+    }
   }
 
   func requestAuthorization(completion: @escaping (Bool) -> Void) {
@@ -107,12 +174,48 @@ class SleepSessionManager: NSObject, ObservableObject {
     }
   }
 
+  func retryAuthorization() {
+    guard !isSessionEnded else {
+      return
+    }
+
+    refreshAuthorizationStatus()
+    if authorizationStatus == .sharingAuthorized {
+      startMonitoring()
+      return
+    }
+
+    isStarting = true
+    status = .starting
+    requestAuthorization { [weak self] success in
+      guard let self else {
+        return
+      }
+      if success {
+        self.startMonitoring()
+      } else {
+        self.isStarting = false
+        self.status = .needsAuthorization
+      }
+    }
+  }
+
   func startMonitoring() {
+    status = .starting
     guard healthAvailabilityProvider() else {
+      status = .healthUnavailable
+      isStarting = false
       return
     }
 
     if workoutSession != nil {
+      isStarting = false
+      return
+    }
+
+    guard motionManager.isAvailable else {
+      status = .motionUnavailable
+      isStarting = false
       return
     }
 
@@ -137,12 +240,18 @@ class SleepSessionManager: NSObject, ObservableObject {
         DispatchQueue.main.async {
           self?.isMonitoring = success
           if success {
+            self?.status = .monitoring
             self?.startMotionUpdates()
+          } else {
+            self?.status = .failed
           }
+          self?.isStarting = false
         }
       }
     } catch {
       isMonitoring = false
+      status = .failed
+      isStarting = false
     }
   }
 
@@ -161,6 +270,7 @@ class SleepSessionManager: NSObject, ObservableObject {
     stopMonitoring()
     isMonitoring = false
     isSessionEnded = true
+    status = .ended
   }
 
   func setMonitoringForTesting(_ value: Bool) {
@@ -184,20 +294,39 @@ class SleepSessionManager: NSObject, ObservableObject {
     latestAcceleration = nil
     lastMotionDetectedAt = nil
     lastHapticTriggeredAt = nil
+    isHapticBurstActive = false
   }
 
   func handleAcceleration(_ acceleration: CMAcceleration, at date: Date) {
     if let previous = latestAcceleration {
       if detectMotion(previous: previous, current: acceleration) {
-        if canTriggerHaptic(at: date) {
-          hapticPlayer.play(hapticType)
-          lastHapticTriggeredAt = date
+        if canTriggerHaptic(at: date) && !isHapticBurstActive {
+          triggerHapticBurst(at: date)
         }
         lastMotionDetectedAt = date
       }
     }
 
     latestAcceleration = acceleration
+  }
+
+  private func triggerHapticBurst(at date: Date) {
+    isHapticBurstActive = true
+    lastHapticTriggeredAt = date
+
+    let burstCount = max(MotionConstants.hapticBurstCount, 1)
+    for index in 0..<burstCount {
+      let delay = TimeInterval(index) * MotionConstants.hapticBurstInterval
+      hapticScheduler.schedule(after: delay) { [weak self] in
+        guard let self else {
+          return
+        }
+        self.hapticPlayer.play(self.hapticType)
+        if index == burstCount - 1 {
+          self.isHapticBurstActive = false
+        }
+      }
+    }
   }
 
   func detectMotion(previous: CMAcceleration, current: CMAcceleration) -> Bool {
@@ -223,6 +352,8 @@ extension SleepSessionManager: HKWorkoutSessionDelegate {
     DispatchQueue.main.async { [weak self] in
       self?.stopMotionUpdates()
       self?.isMonitoring = false
+      self?.status = .failed
+      self?.isStarting = false
     }
   }
 
@@ -237,6 +368,11 @@ extension SleepSessionManager: HKWorkoutSessionDelegate {
         self?.stopMotionUpdates()
         self?.workoutSession = nil
         self?.workoutBuilder = nil
+        self?.status = self?.isSessionEnded == true ? .ended : .failed
+        self?.isStarting = false
+      } else if toState == .running {
+        self?.status = .monitoring
+        self?.isStarting = false
       }
     }
   }

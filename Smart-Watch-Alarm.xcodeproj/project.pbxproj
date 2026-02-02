@@ -10,15 +10,15 @@
 		164366D16C2B48FB8B1AD62C /* SleepSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16E59577B335420A8BB52D03 /* SleepSessionManager.swift */; };
 		2C2D89CF480F475BB97C2814 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8C4E009FE67B471789AF1614 /* XCTest.framework */; };
 		4ECEA047B6CC4985AF524C76 /* MotionConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37D6BCD1B354F4FA28A556F /* MotionConstants.swift */; };
-		6D4C11F912844D17AD6998C6 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9F7E06A9B470CA6BC7661 /* MotionManager.swift */; };
 		687CE6390B4342A283135CF0 /* MotionDetectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C173E4DFAE44943833EC1E0 /* MotionDetectionTests.swift */; };
-		D4E5F6A7B8C9D0E1F2A3B4C5 /* MotionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* MotionManagerTests.swift */; };
-		E5F6A7B8C9D0E1F2A3B4C5D6 /* ContentViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A7B8C9D0E1F2A3 /* ContentViewTests.swift */; };
-		F6A7B8C9D0E1F2A3B4C5D6E7 /* SmartWatchAlarmAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5F6A7B8C9D0E1F2A3B4 /* SmartWatchAlarmAppTests.swift */; };
+		6D4C11F912844D17AD6998C6 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF9F7E06A9B470CA6BC7661 /* MotionManager.swift */; };
 		79590B74D53D47B79DBEB088 /* Smart_Watch_AlarmApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06BA428FC16341D3AC78030D /* Smart_Watch_AlarmApp.swift */; };
 		99E6C63BCD4245A1B2C1F457 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3219B068ED7B43D4A85EBFB8 /* ContentView.swift */; };
 		A393627F2B5E4310B1466ED3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0BD535B6988B4646A3E94A92 /* Assets.xcassets */; };
+		D4E5F6A7B8C9D0E1F2A3B4C5 /* MotionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* MotionManagerTests.swift */; };
+		E5F6A7B8C9D0E1F2A3B4C5D6 /* ContentViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A7B8C9D0E1F2A3 /* ContentViewTests.swift */; };
 		EEC868D710B5408FA76EA54C /* SleepSessionManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4933B58882D49D5A7ADD16D /* SleepSessionManagerTests.swift */; };
+		F6A7B8C9D0E1F2A3B4C5D6E7 /* SmartWatchAlarmAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3D4E5F6A7B8C9D0E1F2A3B4 /* SmartWatchAlarmAppTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,18 +35,18 @@
 		06BA428FC16341D3AC78030D /* Smart_Watch_AlarmApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Smart_Watch_AlarmApp.swift; sourceTree = "<group>"; };
 		0BD535B6988B4646A3E94A92 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0C173E4DFAE44943833EC1E0 /* MotionDetectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionDetectionTests.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0E1F2 /* MotionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManagerTests.swift; sourceTree = "<group>"; };
-		B2C3D4E5F6A7B8C9D0E1F2A3 /* ContentViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewTests.swift; sourceTree = "<group>"; };
-		C3D4E5F6A7B8C9D0E1F2A3B4 /* SmartWatchAlarmAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartWatchAlarmAppTests.swift; sourceTree = "<group>"; };
 		11D1E7AAA5004B51A52B090B /* Smart-Watch-AlarmTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Smart-Watch-AlarmTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		12C55BF685E24B0082680F08 /* Smart-Watch-Alarm.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Smart-Watch-Alarm.entitlements"; sourceTree = "<group>"; };
-		1FF9F7E06A9B470CA6BC7661 /* MotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManager.swift; sourceTree = "<group>"; };
-		D37D6BCD1B354F4FA28A556F /* MotionConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionConstants.swift; sourceTree = "<group>"; };
 		16E59577B335420A8BB52D03 /* SleepSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepSessionManager.swift; sourceTree = "<group>"; };
+		1FF9F7E06A9B470CA6BC7661 /* MotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManager.swift; sourceTree = "<group>"; };
 		3219B068ED7B43D4A85EBFB8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		741B475BE09D4DE3A22B3A43 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		861B8B584C8944519D683879 /* Smart-Watch-Alarm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Smart-Watch-Alarm.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C4E009FE67B471789AF1614 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* MotionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManagerTests.swift; sourceTree = "<group>"; };
+		B2C3D4E5F6A7B8C9D0E1F2A3 /* ContentViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewTests.swift; sourceTree = "<group>"; };
+		C3D4E5F6A7B8C9D0E1F2A3B4 /* SmartWatchAlarmAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartWatchAlarmAppTests.swift; sourceTree = "<group>"; };
+		D37D6BCD1B354F4FA28A556F /* MotionConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionConstants.swift; sourceTree = "<group>"; };
 		D4933B58882D49D5A7ADD16D /* SleepSessionManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepSessionManagerTests.swift; sourceTree = "<group>"; };
 		DDDA726DD0754E04B2AB776B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -273,6 +273,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = H49N2A5477;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -315,6 +316,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = H49N2A5477;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -338,7 +340,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Smart-Watch-Alarm/Smart-Watch-Alarm.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H49N2A5477;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Smart-Watch-Alarm/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -388,7 +390,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Smart-Watch-Alarm/Smart-Watch-Alarm.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = H49N2A5477;
 				ENABLE_TESTABILITY = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "Smart-Watch-Alarm/Info.plist";
