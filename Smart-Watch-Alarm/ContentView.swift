@@ -33,11 +33,12 @@ struct ContentView: View {
       SessionEndedView()
     } else {
       VStack(spacing: 8) {
-        DatePicker("Alarm time", selection: $selectedTime, displayedComponents: .hourAndMinute)
-          .labelsHidden()
-          .datePickerStyle(.wheel)
-          .environment(\.locale, Locale(identifier: "en_GB"))
-          .disabled(isCountdownActive || sessionManager.isMonitoring)
+        if !isCountdownActive && !sessionManager.isMonitoring {
+          DatePicker("Alarm time", selection: $selectedTime, displayedComponents: .hourAndMinute)
+            .labelsHidden()
+            .datePickerStyle(.wheel)
+            .environment(\.locale, Locale(identifier: "en_GB"))
+        }
 
         if let countdownText {
           Text(countdownText)
@@ -65,7 +66,7 @@ struct ContentView: View {
             .frame(width: size, height: size)
             .opacity(sessionManager.isMonitoring ? 1 : 0)
         )
-        .disabled(isCountdownActive && !sessionManager.isMonitoring)
+        .disabled(sessionManager.status == .starting)
 
         Text(statusText)
           .font(.footnote)
@@ -179,7 +180,11 @@ struct ContentView: View {
   }
 
   func handleStopTapped() {
-    sessionManager.stopSession()
+    if isCountdownActive && !sessionManager.isMonitoring {
+      cancelCountdown()
+    } else {
+      sessionManager.stopSession()
+    }
   }
 
   var countdownText: String? {
@@ -194,15 +199,15 @@ struct ContentView: View {
   }
 
   var primaryButtonTitle: String {
-    sessionManager.isMonitoring ? "STOP" : "START"
+    (isCountdownActive || sessionManager.isMonitoring) ? "STOP" : "START"
   }
 
   var primaryButtonColor: Color {
-    sessionManager.isMonitoring ? .red : .green
+    (isCountdownActive || sessionManager.isMonitoring) ? .red : .green
   }
 
   func handlePrimaryTapped() {
-    if sessionManager.isMonitoring {
+    if isCountdownActive || sessionManager.isMonitoring {
       handleStopTapped()
     } else {
       handleStartTapped()
@@ -220,6 +225,13 @@ struct ContentView: View {
     countdownRemaining = target.timeIntervalSince(now)
     isCountdownActive = true
     didInitiateStart = true
+  }
+
+  func cancelCountdown() {
+    isCountdownActive = false
+    countdownRemaining = nil
+    countdownTarget = nil
+    didInitiateStart = false
   }
 
   func nextTriggerDate(from selectedTime: Date, now: Date) -> Date {
