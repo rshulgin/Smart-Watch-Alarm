@@ -66,7 +66,7 @@ struct ContentView: View {
             .frame(width: size, height: size)
             .opacity(sessionManager.isMonitoring ? 1 : 0)
         )
-        .disabled(sessionManager.status == .starting)
+        .disabled(shouldDisablePrimaryButton)
 
         Text(statusText)
           .font(.footnote)
@@ -147,6 +147,14 @@ struct ContentView: View {
     default:
       return false
     }
+  }
+
+  var shouldDisablePrimaryButton: Bool {
+    if isCountdownActive || sessionManager.isMonitoring {
+      return false
+    }
+
+    return didInitiateStart && sessionManager.status == .starting
   }
 
   var hasStatusError: Bool {

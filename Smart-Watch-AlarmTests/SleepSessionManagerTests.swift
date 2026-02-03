@@ -90,7 +90,11 @@ final class SleepSessionManagerTests: XCTestCase {
     let builder = FakeWorkoutBuilder()
     let session = FakeWorkoutSession(builder: builder)
     let factory = FakeWorkoutSessionFactory(session: session)
-    let manager = SleepSessionManager(workoutSessionFactory: factory,
+    let motionProvider = FakeMotionProvider()
+    motionProvider.isAccelerometerAvailable = true
+    motionProvider.isAccelerometerActive = false
+    let manager = SleepSessionManager(motionManager: MotionManager(motionManager: motionProvider),
+                                      workoutSessionFactory: factory,
                                       healthAvailabilityProvider: { true })
     let expectation = expectation(description: "Monitoring starts")
 
@@ -107,7 +111,11 @@ final class SleepSessionManagerTests: XCTestCase {
 
   func testStartMonitoringFactoryThrowsSetsMonitoringFalse() {
     let factory = FakeWorkoutSessionFactory(error: TestError.forced)
-    let manager = SleepSessionManager(workoutSessionFactory: factory,
+    let motionProvider = FakeMotionProvider()
+    motionProvider.isAccelerometerAvailable = true
+    motionProvider.isAccelerometerActive = false
+    let manager = SleepSessionManager(motionManager: MotionManager(motionManager: motionProvider),
+                                      workoutSessionFactory: factory,
                                       healthAvailabilityProvider: { true })
 
     manager.startMonitoring()
@@ -129,7 +137,11 @@ final class SleepSessionManagerTests: XCTestCase {
     let builder = FakeWorkoutBuilder()
     let session = FakeWorkoutSession(builder: builder)
     let factory = FakeWorkoutSessionFactory(session: session)
-    let manager = SleepSessionManager(workoutSessionFactory: factory,
+    let motionProvider = FakeMotionProvider()
+    motionProvider.isAccelerometerAvailable = true
+    motionProvider.isAccelerometerActive = false
+    let manager = SleepSessionManager(motionManager: MotionManager(motionManager: motionProvider),
+                                      workoutSessionFactory: factory,
                                       healthAvailabilityProvider: { true })
     let expectation = expectation(description: "Stop monitoring")
 
