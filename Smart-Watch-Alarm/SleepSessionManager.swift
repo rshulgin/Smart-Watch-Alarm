@@ -109,7 +109,7 @@ class SleepSessionManager: NSObject, ObservableObject {
        motionManager: MotionManager = MotionManager(),
        hapticPlayer: HapticPlaying = DefaultHapticPlayer(),
        hapticScheduler: HapticScheduling = MainHapticScheduler(),
-       hapticPattern: [WKHapticType] = [.failure, .notification, .success, .failure, .notification],
+       hapticPattern: [WKHapticType] = [.failure, .notification],
        workoutSessionFactory: WorkoutSessionFactory = HealthKitWorkoutSessionFactory(),
        healthAvailabilityProvider: @escaping () -> Bool = HKHealthStore.isHealthDataAvailable,
        dateProvider: @escaping () -> Date = Date.init) {
@@ -402,25 +402,18 @@ extension SleepSessionManager: HKLiveWorkoutBuilderDelegate {
 
 struct AlarmSchedule {
   let target: Date
-  let monitoringStart: Date
 }
 
 final class AlarmCoordinator {
   static let shared = AlarmCoordinator()
 
   private let targetKey = "alarmTargetTimestamp"
-  private let monitoringKey = "alarmMonitoringStartTimestamp"
-  private let leadTime: TimeInterval = 10 * 60
 
   @discardableResult
   func schedule(target: Date) -> AlarmSchedule {
-    let now = Date()
-    let monitoringStart = max(target.addingTimeInterval(-leadTime), now)
-    let schedule = AlarmSchedule(target: target, monitoringStart: monitoringStart)
+    let schedule = AlarmSchedule(target: target)
 
     UserDefaults.standard.set(target.timeIntervalSince1970, forKey: targetKey)
-    UserDefaults.standard.set(monitoringStart.timeIntervalSince1970, forKey: monitoringKey)
-    scheduleBackgroundRefresh(at: monitoringStart)
 
     return schedule
   }
@@ -430,43 +423,11 @@ final class AlarmCoordinator {
     guard targetTimestamp > 0 else {
       return nil
     }
-
-    let monitoringTimestamp = UserDefaults.standard.double(forKey: monitoringKey)
     let target = Date(timeIntervalSince1970: targetTimestamp)
-    let monitoringStart: Date
-    if monitoringTimestamp > 0 {
-      monitoringStart = Date(timeIntervalSince1970: monitoringTimestamp)
-    } else {
-      monitoringStart = target.addingTimeInterval(-leadTime)
-    }
-
-    return AlarmSchedule(target: target, monitoringStart: monitoringStart)
+    return AlarmSchedule(target: target)
   }
 
   func clearSchedule() {
     UserDefaults.standard.removeObject(forKey: targetKey)
-    UserDefaults.standard.removeObject(forKey: monitoringKey)
-  }
-
-  func handleBackgroundRefresh(sessionManager: SleepSessionManager) {
-    guard let schedule = loadSchedule() else {
-      return
-    }
-
-    let now = Date()
-    if now >= schedule.monitoringStart {
-      sessionManager.setHapticsNotBefore(schedule.target)
-      sessionManager.attemptStart()
-    } else {
-      scheduleBackgroundRefresh(at: schedule.monitoringStart)
-    }
-  }
-
-  private func scheduleBackgroundRefresh(at date: Date) {
-    WKExtension.shared().scheduleBackgroundRefresh(withPreferredDate: date, userInfo: nil) { error in
-      if let error {
-        NSLog("Background refresh scheduling failed: %@", error.localizedDescription)
-      }
-    }
   }
 }

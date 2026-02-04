@@ -249,10 +249,7 @@ struct ContentView: View {
     isCountdownActive = now < schedule.target
     didInitiateStart = true
     sessionManager.setHapticsNotBefore(schedule.target)
-
-    if now >= schedule.monitoringStart {
-      sessionManager.attemptStart()
-    }
+    sessionManager.attemptStart()
   }
 
   func cancelCountdown() {
@@ -278,7 +275,6 @@ struct ContentView: View {
     if isCountdownActive {
       refreshCountdown()
     }
-    ensureMonitoringStartedIfNeeded()
   }
 
   func refreshCountdown() {
@@ -294,17 +290,6 @@ struct ContentView: View {
       isCountdownActive = false
     } else {
       countdownRemaining = remaining
-    }
-  }
-
-  func ensureMonitoringStartedIfNeeded() {
-    guard let schedule = alarmSchedule else {
-      return
-    }
-
-    if Date() >= schedule.monitoringStart {
-      sessionManager.setHapticsNotBefore(schedule.target)
-      sessionManager.attemptStart()
     }
   }
 
@@ -326,7 +311,9 @@ struct ContentView: View {
     didInitiateStart = true
     selectedTime = schedule.target
     sessionManager.setHapticsNotBefore(schedule.target)
-    ensureMonitoringStartedIfNeeded()
+    if !sessionManager.isMonitoring {
+      sessionManager.attemptStart()
+    }
   }
 
   func clearCountdownState() {
