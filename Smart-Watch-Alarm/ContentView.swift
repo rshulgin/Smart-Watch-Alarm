@@ -8,13 +8,18 @@ struct ContentView: View {
   @State private var countdownTarget: Date?
   @State private var isCountdownActive = false
   @State private var didInitiateStart = false
+  @State private var alarmSchedule: AlarmSchedule?
   @Environment(\.scenePhase) private var scenePhase
   private let countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+  private let alarmCoordinator = AlarmCoordinator.shared
 
   var body: some View {
     GeometryReader { proxy in
       bodyContent(size: min(proxy.size.width, proxy.size.height) * 0.8)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+    }
+    .onAppear {
+      syncScheduleState()
     }
     .onChange(of: sessionManager.isMonitoring) { oldValue, newValue in
       handleMonitoringChange(newValue)
@@ -177,6 +182,7 @@ struct ContentView: View {
 
   func handleScenePhaseChange(_ newPhase: ScenePhase) {
     if newPhase == .active {
+      syncScheduleState()
       if isCountdownActive {
         refreshCountdown()
       }
@@ -190,8 +196,15 @@ struct ContentView: View {
   func handleStopTapped() {
     if isCountdownActive && !sessionManager.isMonitoring {
       cancelCountdown()
+      alarmCoordinator.clearSchedule()
+      alarmSchedule = nil
+      sessionManager.setHapticsNotBefore(nil)
     } else {
       sessionManager.stopSession()
+      alarmCoordinator.clearSchedule()
+      alarmSchedule = nil
+      clearCountdownState()
+      sessionManager.setHapticsNotBefore(nil)
     }
   }
 
@@ -229,17 +242,21 @@ struct ContentView: View {
 
     let now = Date()
     let target = nextTriggerDate(from: selectedTime, now: now)
-    countdownTarget = target
-    countdownRemaining = target.timeIntervalSince(now)
-    isCountdownActive = true
+    let schedule = alarmCoordinator.schedule(target: target)
+    alarmSchedule = schedule
+    countdownTarget = schedule.target
+    countdownRemaining = schedule.target.timeIntervalSince(now)
+    isCountdownActive = now < schedule.target
     didInitiateStart = true
+    sessionManager.setHapticsNotBefore(schedule.target)
+
+    if now >= schedule.monitoringStart {
+      sessionManager.attemptStart()
+    }
   }
 
   func cancelCountdown() {
-    isCountdownActive = false
-    countdownRemaining = nil
-    countdownTarget = nil
-    didInitiateStart = false
+    clearCountdownState()
   }
 
   func nextTriggerDate(from selectedTime: Date, now: Date) -> Date {
@@ -258,10 +275,10 @@ struct ContentView: View {
   }
 
   func handleCountdownTick() {
-    guard isCountdownActive else {
-      return
+    if isCountdownActive {
+      refreshCountdown()
     }
-    refreshCountdown()
+    ensureMonitoringStartedIfNeeded()
   }
 
   func refreshCountdown() {
@@ -275,10 +292,48 @@ struct ContentView: View {
     if remaining <= 0 {
       countdownRemaining = 0
       isCountdownActive = false
-      sessionManager.attemptStart()
     } else {
       countdownRemaining = remaining
     }
+  }
+
+  func ensureMonitoringStartedIfNeeded() {
+    guard let schedule = alarmSchedule else {
+      return
+    }
+
+    if Date() >= schedule.monitoringStart {
+      sessionManager.setHapticsNotBefore(schedule.target)
+      sessionManager.attemptStart()
+    }
+  }
+
+  func syncScheduleState() {
+    guard let schedule = alarmCoordinator.loadSchedule() else {
+      return
+    }
+
+    alarmSchedule = schedule
+    countdownTarget = schedule.target
+    let now = Date()
+    if now < schedule.target {
+      countdownRemaining = schedule.target.timeIntervalSince(now)
+      isCountdownActive = true
+    } else {
+      countdownRemaining = nil
+      isCountdownActive = false
+    }
+    didInitiateStart = true
+    selectedTime = schedule.target
+    sessionManager.setHapticsNotBefore(schedule.target)
+    ensureMonitoringStartedIfNeeded()
+  }
+
+  func clearCountdownState() {
+    isCountdownActive = false
+    countdownRemaining = nil
+    countdownTarget = nil
+    didInitiateStart = false
   }
 }
 
