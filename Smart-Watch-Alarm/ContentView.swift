@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
   @ObservedObject var sessionManager: SleepSessionManager
+  @ObservedObject var settings: AppSettings
   @State private var pulse = false
   @State private var selectedTime = Date()
   @State private var countdownRemaining: TimeInterval?
@@ -30,12 +31,20 @@ struct ContentView: View {
     .onReceive(countdownTimer) { _ in
       handleCountdownTick()
     }
+    .toolbar {
+      ToolbarItem(placement: .topBarTrailing) {
+        NavigationLink(destination: SettingsView(settings: settings)) {
+          Image(systemName: "gearshape")
+        }
+        .disabled(sessionManager.isMonitoring || isCountdownActive)
+      }
+    }
   }
 
   @ViewBuilder
   func bodyContent(size: CGFloat) -> some View {
     if sessionManager.isSessionEnded {
-      SessionEndedView()
+      SessionEndedView(onRestart: handleRestart)
     } else {
       VStack(spacing: 8) {
         if !isCountdownActive && !sessionManager.isMonitoring {
@@ -193,6 +202,13 @@ struct ContentView: View {
     pulse = newValue
   }
 
+  func handleRestart() {
+    sessionManager.resetSession()
+    clearCountdownState()
+    alarmSchedule = nil
+    alarmCoordinator.clearSchedule()
+  }
+
   func handleStopTapped() {
     if isCountdownActive && !sessionManager.isMonitoring {
       cancelCountdown()
@@ -325,18 +341,25 @@ struct ContentView: View {
 }
 
 struct SessionEndedView: View {
+  let onRestart: () -> Void
+
   var body: some View {
-    VStack(spacing: 8) {
+    VStack(spacing: 12) {
       Text("Session Ended")
         .font(.headline)
       Text("Monitoring stopped")
         .font(.footnote)
         .foregroundColor(.secondary)
+      Button("New Session", action: onRestart)
+        .buttonStyle(.bordered)
+        .font(.footnote)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
   }
 }
 
 #Preview {
-  ContentView(sessionManager: SleepSessionManager())
+  NavigationStack {
+    ContentView(sessionManager: SleepSessionManager(), settings: AppSettings())
+  }
 }

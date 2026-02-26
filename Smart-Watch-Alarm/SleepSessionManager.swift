@@ -1,7 +1,10 @@
 import CoreMotion
 import Foundation
 import HealthKit
+import os
 import WatchKit
+
+private let logger = Logger(subsystem: "com.app.smart-watch-alarm", category: "SleepSession")
 
 protocol HealthStoreAuthorizationProviding {
   func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus
@@ -95,6 +98,7 @@ class SleepSessionManager: NSObject, ObservableObject {
   private let dateProvider: () -> Date
   private let hapticType: WKHapticType = .failure
   private let hapticPattern: [WKHapticType]
+  private let settings: AppSettings
   private var workoutSession: WorkoutSessioning?
   private var workoutBuilder: WorkoutSessionBuilding?
   private var latestAcceleration: CMAcceleration?
@@ -112,7 +116,8 @@ class SleepSessionManager: NSObject, ObservableObject {
        hapticPattern: [WKHapticType] = [.failure, .notification],
        workoutSessionFactory: WorkoutSessionFactory = HealthKitWorkoutSessionFactory(),
        healthAvailabilityProvider: @escaping () -> Bool = HKHealthStore.isHealthDataAvailable,
-       dateProvider: @escaping () -> Date = Date.init) {
+       dateProvider: @escaping () -> Date = Date.init,
+       settings: AppSettings = .shared) {
     self.healthStore = healthStore
     self.authorizationStore = authorizationStore ?? healthStore
     self.motionManager = motionManager
@@ -122,6 +127,7 @@ class SleepSessionManager: NSObject, ObservableObject {
     self.workoutSessionFactory = workoutSessionFactory
     self.healthAvailabilityProvider = healthAvailabilityProvider
     self.dateProvider = dateProvider
+    self.settings = settings
     super.init()
   }
 
@@ -207,8 +213,10 @@ class SleepSessionManager: NSObject, ObservableObject {
   }
 
   func startMonitoring() {
+    logger.info("startMonitoring called")
     status = .starting
     guard healthAvailabilityProvider() else {
+      logger.warning("Health data unavailable")
       status = .healthUnavailable
       isStarting = false
       return
@@ -220,6 +228,7 @@ class SleepSessionManager: NSObject, ObservableObject {
     }
 
     guard motionManager.isAvailable else {
+      logger.warning("Motion manager unavailable")
       status = .motionUnavailable
       isStarting = false
       return
@@ -246,15 +255,18 @@ class SleepSessionManager: NSObject, ObservableObject {
         DispatchQueue.main.async {
           self?.isMonitoring = success
           if success {
+            logger.info("Monitoring started successfully")
             self?.status = .monitoring
             self?.startMotionUpdates()
           } else {
+            logger.error("beginCollection failed")
             self?.status = .failed
           }
           self?.isStarting = false
         }
       }
     } catch {
+      logger.error("Failed to create workout session: \(error.localizedDescription)")
       isMonitoring = false
       status = .failed
       isStarting = false
@@ -273,10 +285,26 @@ class SleepSessionManager: NSObject, ObservableObject {
   }
 
   func stopSession() {
+    logger.info("stopSession called")
     stopMonitoring()
     isMonitoring = false
     isSessionEnded = true
     status = .ended
+  }
+
+  func resetSession() {
+    logger.info("resetSession called")
+    isSessionEnded = false
+    isMonitoring = false
+    isStarting = false
+    status = .starting
+    workoutSession = nil
+    workoutBuilder = nil
+    latestAcceleration = nil
+    lastMotionDetectedAt = nil
+    lastHapticTriggeredAt = nil
+    hapticsNotBefore = nil
+    isHapticBurstActive = false
   }
 
   func setHapticsNotBefore(_ date: Date?) {
@@ -325,7 +353,8 @@ class SleepSessionManager: NSObject, ObservableObject {
     lastHapticTriggeredAt = date
 
     let pattern = hapticPattern.isEmpty ? [hapticType] : hapticPattern
-    let burstCount = max(MotionConstants.hapticBurstCount, pattern.count)
+    let burstCount = max(settings.hapticIntensity.burstCount, pattern.count)
+    logger.info("Triggering haptic burst: \(burstCount) pulses")
     for index in 0..<burstCount {
       let delay = TimeInterval(index) * MotionConstants.hapticBurstInterval
       hapticScheduler.schedule(after: delay) { [weak self] in
@@ -347,7 +376,7 @@ class SleepSessionManager: NSObject, ObservableObject {
     let deltaZ = current.z - previous.z
     let deltaMagnitude = sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ)
 
-    return deltaMagnitude >= MotionConstants.motionThreshold
+    return deltaMagnitude >= settings.motionSensitivity.threshold
   }
 
   func canTriggerHaptic(at date: Date) -> Bool {
@@ -365,6 +394,7 @@ class SleepSessionManager: NSObject, ObservableObject {
 
 extension SleepSessionManager: HKWorkoutSessionDelegate {
   func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {
+    logger.error("Workout session failed: \(error.localizedDescription)")
     DispatchQueue.main.async { [weak self] in
       self?.stopMotionUpdates()
       self?.isMonitoring = false
